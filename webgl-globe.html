@@ -1,0 +1,108 @@
+<!--
+# (c) Copyright Jupyter Development Team
+# (c) Copyright IBM Corp. 2015
+-->
+<link rel='import' href='../polymer/polymer.html'>
+<script src="../threejs/build/three.js"></script>
+<script src="globe/globe.js"></script>
+
+
+<dom-module id="webgl-globe">
+    <template>
+        <style>
+          #elemContainer {
+            background-color: #000;
+            color: #FFF;
+            padding: 5px;
+          }
+          #container canvas{
+            width: 100% !important;
+            position: relative !important;
+          }
+        </style>
+        <div id="elemContainer">
+          <div id="container"></div>
+          <content></content>
+        </div>
+    </template>
+</dom-module>
+
+<script>
+    (function () {
+        'use strict';
+
+        Polymer({
+            is: 'webgl-globe',
+            properties: {
+              data: {
+                type: Array,
+                observer: '_dataChanged'
+              },
+              dataUrl: String
+            },
+
+            _readDataFromUrl: function(url) {
+              if (this.globe) {
+                var xhr = new XMLHttpRequest();
+                xhr.open( 'GET', url, true );
+
+                xhr.onreadystatechange = function() {
+                    if ( xhr.readyState === 4 && xhr.status === 200 ) {
+                      var raw_data = JSON.parse( xhr.responseText );
+                      var data = [];
+                      data = data.concat(raw_data);
+
+                      this.globe.addData( data, {format: 'magnitude'} );
+
+                      this.globe.createPoints();
+
+                      this.globe.animate();
+                    }
+                }.bind(this);
+
+                xhr.send( null );
+              }
+            },
+
+            _dataChanged: function(newData) {
+              if (!newData) { return; }
+              
+              if (this.dataUrl) { return; } // if dataUrl is provided, we ignore this data change
+
+              if(this.globe) {
+                if (typeof newData === "string") {
+                  newData = JSON.parse(newData);
+                }
+                var data = [];
+                data = data.concat(newData);
+
+                this.globe.addData( data, {format: 'magnitude'} );
+
+                this.globe.createPoints();
+
+                this.globe.animate();
+              }
+            },
+
+            _init: function() {
+              var container = this.$.container;
+
+              // Make the globe
+              this.globe = new DAT.Globe( container, {imgDir: 'globe/'} );
+
+              if (this.dataUrl) {
+                this._readDataFromUrl(this.dataUrl);
+              } else if (this.data) {
+                this._dataChanged(this.data);
+              }
+              
+            },
+
+            ready: function() {  
+              this.async(function(){
+                this._init();
+              });
+            }
+        });
+    })();
+</script>
