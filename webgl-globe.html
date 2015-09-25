@@ -50,7 +50,9 @@
                     if ( xhr.readyState === 4 && xhr.status === 200 ) {
                       var raw_data = JSON.parse( xhr.responseText );
                       var data = [];
-                      data = data.concat(raw_data);
+                      for ( var i = 0; i < raw_data.length; i ++ ) {
+                        data = data.concat(raw_data[i]);
+                      }
 
                       this.globe.addData( data, {format: 'magnitude'} );
 
@@ -74,7 +76,9 @@
                   newData = JSON.parse(newData);
                 }
                 var data = [];
-                data = data.concat(newData);
+                for ( var i = 0; i < newData.length; i ++ ) {
+                  data = data.concat(newData[i]);
+                }
 
                 this.globe.addData( data, {format: 'magnitude'} );
 
