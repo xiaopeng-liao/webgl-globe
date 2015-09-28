@@ -10,20 +10,17 @@
 <dom-module id="webgl-globe">
     <template>
         <style>
-          #elemContainer {
-            background-color: #000;
-            color: #FFF;
-            padding: 5px;
+          :host {
+            display: block;
+            height: 100%;
+            width: 100%;
           }
-          #container canvas{
-            width: 100% !important;
+          #container canvas {
             position: relative !important;
           }
         </style>
-        <div id="elemContainer">
-          <div id="container"></div>
-          <content></content>
-        </div>
+        <div id="container"></div>
+        <content></content>
     </template>
 </dom-module>
 
@@ -40,6 +37,8 @@
               },
               dataUrl: String
             },
+
+            DEFAULT_HEIGHT: 500,
 
             _readDataFromUrl: function(url) {
               if (this.globe) {
@@ -88,8 +87,45 @@
               }
             },
 
+            _onWindowResize: function() {
+              if(this.globe) {
+                var container = this.$.container;
+                var newHeight = this.widthHeightRatio ? container.offsetWidth/this.widthHeightRatio : container.offsetWidth;
+                this.widthHeightRatio = container.offsetWidth / newHeight;
+
+                container.style.height = newHeight + "px";
+
+                this.globe.onWindowResize();
+              }
+            },
+
+            _getParentHeight: function() {
+              if(this.parentNode && this.parentNode.offsetHeight > this.DEFAULT_HEIGHT) {
+                return this.parentNode.offsetHeight;
+              } else {
+                return this.DEFAULT_HEIGHT;
+              }
+            },
+
+            _getParentWidth: function(current) {
+              if(this.parentNode && this.parentNode.offsetWidth) {
+                return this.parentNode.offsetWidth;
+              }
+            },
+
+            _setContainerSize: function() {
+              var height = this._getParentHeight();
+              var width = this._getParentWidth();
+              this.widthHeightRatio = width/height;
+
+              var container = this.$.container;
+              container.style.height = height + "px";
+            },
+
             _init: function() {
               var container = this.$.container;
+              
+              this._setContainerSize();
 
               // Make the globe
               this.globe = new DAT.Globe( container, {imgDir: 'globe/'} );
@@ -99,6 +135,8 @@
               } else if (this.data) {
                 this._dataChanged(this.data);
               }
+
+              window.addEventListener('resize', this._onWindowResize.bind(this), false);
               
             },
 

@@ -402,7 +402,8 @@ DAT.Globe = function(container, opts) {
   this.createPoints = createPoints;
   this.renderer = renderer;
   this.scene = scene;
-
+  this.onWindowResize = onWindowResize;
+  
   return this;
 
 };
