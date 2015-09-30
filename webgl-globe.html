@@ -47,11 +47,7 @@
 
                 xhr.onreadystatechange = function() {
                     if ( xhr.readyState === 4 && xhr.status === 200 ) {
-                      var raw_data = JSON.parse( xhr.responseText );
-                      var data = [];
-                      for ( var i = 0; i < raw_data.length; i ++ ) {
-                        data = data.concat(raw_data[i]);
-                      }
+                      var data = JSON.parse( xhr.responseText );
 
                       this.globe.addData( data, {format: 'magnitude'} );
 
@@ -71,9 +67,6 @@
               if (this.dataUrl) { return; } // if dataUrl is provided, we ignore this data change
 
               if(this.globe) {
-                if (typeof newData === "string") {
-                  newData = JSON.parse(newData);
-                }
                 var data = [];
                 for ( var i = 0; i < newData.length; i ++ ) {
                   data = data.concat(newData[i]);
