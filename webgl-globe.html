@@ -115,7 +115,7 @@
               container.style.height = height + "px";
             },
 
-            _init: function() {
+            ready: function() {
               var container = this.$.container;
               
               this._setContainerSize();
@@ -128,12 +128,6 @@
               } else if (this.data) {
                 this._dataChanged(this.data);
               }
-            },
-
-            ready: function() {  
-              this.async(function(){
-                this._init();
-              });
             },
 
             attached: function() {
