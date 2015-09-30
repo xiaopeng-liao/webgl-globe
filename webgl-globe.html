@@ -128,15 +128,21 @@
               } else if (this.data) {
                 this._dataChanged(this.data);
               }
-
-              window.addEventListener('resize', this._onWindowResize.bind(this), false);
-              
             },
 
             ready: function() {  
               this.async(function(){
                 this._init();
               });
+            },
+
+            attached: function() {
+              this._resizer = this._onWindowResize.bind(this);
+              window.addEventListener('resize', this._resizer);
+            },
+
+            detached: function() {
+              window.removeEventListener('resize', this._resizer);
             }
         });
     })();
