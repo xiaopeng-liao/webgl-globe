@@ -118,19 +118,26 @@
             },
 
             ready: function() {
-              var container = this.$.container;
+              this.async(function(){
+                var display = window.getComputedStyle(this).display;
+                if (display === 'none' || document.readyState !== 'complete') {
+                  this.async(this.ready, 200);
+                } else {
+                  var container = this.$.container;
               
-              this._setContainerSize();
+                  this._setContainerSize();
 
-              // Make the globe
-              this.globe = new DAT.Globe( container, {imgDir: this.resolveUrl('globe/')} );
+                  // Make the globe
+                  this.globe = new DAT.Globe( container, {imgDir: this.resolveUrl('globe/')} );
 
-              if (this.dataUrl) {
-                this._readDataFromUrl(this.dataUrl);
-              } else if (this.data) {
-                this._dataChanged(this.data);
-                this.globe.animate();
-              }
+                  if (this.dataUrl) {
+                    this._readDataFromUrl(this.dataUrl);
+                  } else if (this.data) {
+                    this._dataChanged(this.data);
+                    this.globe.animate();
+                  }
+                }
+              });
             },
 
             attached: function() {
