@@ -66,17 +66,19 @@
               
               if (this.dataUrl) { return; } // if dataUrl is provided, we ignore this data change
 
-              if(this.globe) {
+              if (this.globe) {
                 var data = [];
                 for ( var i = 0; i < newData.length; i ++ ) {
                   data = data.concat(newData[i]);
                 }
 
-                this.globe.addData( data, {format: 'magnitude'} );
+                if (this.globe.points) {
+                    this.globe.scene.remove(this.globe.points);
+                }
+
+                this.globe.addData(data, {format: 'magnitude'});
 
                 this.globe.createPoints();
-
-                this.globe.animate();
               }
             },
 
@@ -127,6 +129,7 @@
                 this._readDataFromUrl(this.dataUrl);
               } else if (this.data) {
                 this._dataChanged(this.data);
+                this.globe.animate();
               }
             },
 
