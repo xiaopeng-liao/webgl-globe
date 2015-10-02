@@ -38,6 +38,13 @@
               dataUrl: String
             },
 
+            behaviors: [
+              Polymer.IronResizableBehavior
+            ],
+            listeners: {
+              'iron-resize': '_resizeGlobe'
+            },
+
             DEFAULT_HEIGHT: 500,
 
             _readDataFromUrl: function(url) {
@@ -82,7 +89,7 @@
               }
             },
 
-            _onWindowResize: function() {
+            _resizeGlobe: function() {
               if(this.globe) {
                 var container = this.$.container;
                 var newHeight = this.widthHeightRatio ? container.offsetWidth/this.widthHeightRatio : container.offsetWidth;
@@ -138,15 +145,6 @@
                   }
                 }
               });
-            },
-
-            attached: function() {
-              this._resizer = this._onWindowResize.bind(this);
-              window.addEventListener('resize', this._resizer);
-            },
-
-            detached: function() {
-              window.removeEventListener('resize', this._resizer);
             }
         });
     })();
