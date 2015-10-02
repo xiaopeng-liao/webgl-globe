@@ -92,7 +92,10 @@
             _resizeGlobe: function() {
               if(this.globe) {
                 var container = this.$.container;
-                var newHeight = this.widthHeightRatio ? container.offsetWidth/this.widthHeightRatio : container.offsetWidth;
+                var newHeight = container.offsetHeight;
+                if (!newHeight || newHeight === 0) {
+                  newHeight = this.widthHeightRatio ? container.offsetWidth/this.widthHeightRatio : this.DEFAULT_HEIGHT;
+                }
                 this.widthHeightRatio = container.offsetWidth / newHeight;
 
                 container.style.height = newHeight + "px";
