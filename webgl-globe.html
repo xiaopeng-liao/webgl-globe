@@ -59,8 +59,6 @@
                       this.globe.addData( data, {format: 'magnitude'} );
 
                       this.globe.createPoints();
-
-                      this.globe.animate();
                     }
                 }.bind(this);
 
@@ -144,8 +142,9 @@
                     this._readDataFromUrl(this.dataUrl);
                   } else if (this.data) {
                     this._dataChanged(this.data);
-                    this.globe.animate();
                   }
+
+                  this.globe.animate();
                 }
               });
             }
