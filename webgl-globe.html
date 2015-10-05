@@ -6,6 +6,14 @@
 <script src="../threejs/build/three.js"></script>
 <script src="globe/globe.js"></script>
 
+<!--
+Creates a Polymer element that displays a globe using the globe.js library
+
+The globe accepts data via attribute `data` or 'dataUrl'. If both exist, `dataUrl` takes precedence, 
+and `data` is ignored.
+
+@element webgl-globe
+-->
 
 <dom-module id="webgl-globe">
     <template>
@@ -31,10 +39,27 @@
         Polymer({
             is: 'webgl-globe',
             properties: {
+              /**
+                 * Data for globe. Must be an Array of Arrays
+                 * example: [[lat, long, magnitude, lat, long, magnitude, ...] ] where magnitude is a number between 0 and 1
+                 * 
+                 * Will be ignored if `dataUrl` is defined
+                 *
+                 * @attribute data
+                 * @type Array
+                 */
               data: {
                 type: Array,
                 observer: '_dataChanged'
               },
+
+              /**
+                 * Data URL for globe. Must be String
+                 * takes precedence over `data`
+                 *
+                 * @attribute data-url
+                 * @type String
+                 */
               dataUrl: String
             },
 
