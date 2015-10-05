@@ -45,7 +45,7 @@
               'iron-resize': '_resizeGlobe'
             },
 
-            DEFAULT_HEIGHT: 500,
+            DEFAULT_SIZE: 500,
 
             _readDataFromUrl: function(url) {
               if (this.globe) {
@@ -89,40 +89,19 @@
 
             _resizeGlobe: function() {
               if(this.globe) {
-                var container = this.$.container;
-                var newHeight = container.offsetHeight;
-                if (!newHeight || newHeight === 0) {
-                  newHeight = this.widthHeightRatio ? container.offsetWidth/this.widthHeightRatio : this.DEFAULT_HEIGHT;
-                }
-                this.widthHeightRatio = container.offsetWidth / newHeight;
-
-                container.style.height = newHeight + "px";
+                var newSize = this.$.container.offsetWidth || this.DEFAULT_SIZE;
+                this._setContainerHeight(newSize);
 
                 this.globe.onWindowResize();
               }
             },
 
-            _getParentHeight: function() {
-              if(this.parentNode && this.parentNode.offsetHeight > this.DEFAULT_HEIGHT) {
-                return this.parentNode.offsetHeight;
-              } else {
-                return this.DEFAULT_HEIGHT;
-              }
+            _getDimension: function() {
+              return this.$.container.offsetWidth || this.DEFAULT_SIZE;
             },
 
-            _getParentWidth: function(current) {
-              if(this.parentNode && this.parentNode.offsetWidth) {
-                return this.parentNode.offsetWidth;
-              }
-            },
-
-            _setContainerSize: function() {
-              var height = this._getParentHeight();
-              var width = this._getParentWidth();
-              this.widthHeightRatio = width/height;
-
-              var container = this.$.container;
-              container.style.height = height + "px";
+            _setContainerHeight: function(height) {
+              this.$.container.style.height = height + "px";
             },
 
             ready: function() {
@@ -132,8 +111,8 @@
                   this.async(this.ready, 200);
                 } else {
                   var container = this.$.container;
-              
-                  this._setContainerSize();
+
+                  this._setContainerHeight(this._getDimension());
 
                   // Make the globe
                   this.globe = new DAT.Globe( container, {imgDir: this.resolveUrl('globe/')} );
