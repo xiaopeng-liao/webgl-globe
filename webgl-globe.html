@@ -1,0 +1,157 @@
+<!--
+# (c) Copyright Jupyter Development Team
+# (c) Copyright IBM Corp. 2015
+-->
+<link rel='import' href='../polymer/polymer.html'>
+<script src="../threejs/build/three.js"></script>
+<script src="globe/globe.js"></script>
+
+<!--
+Creates a Polymer element that displays a globe using the globe.js library
+
+The globe accepts data via attribute `data` or 'dataUrl'. If both exist, `dataUrl` takes precedence, 
+and `data` is ignored.
+
+@element webgl-globe
+-->
+
+<dom-module id="webgl-globe">
+    <template>
+        <style>
+          :host {
+            display: block;
+            height: 100%;
+            width: 100%;
+          }
+          #container canvas {
+            position: relative !important;
+          }
+        </style>
+        <div id="container"></div>
+        <content></content>
+    </template>
+</dom-module>
+
+<script>
+    (function () {
+        'use strict';
+
+        Polymer({
+            is: 'webgl-globe',
+            properties: {
+              /**
+                 * Data for globe. Must be an Array of Arrays
+                 * example: [[lat, long, magnitude, lat, long, magnitude, ...] ] where magnitude is a number between 0 and 1
+                 * 
+                 * Will be ignored if `dataUrl` is defined
+                 *
+                 * @attribute data
+                 * @type Array
+                 */
+              data: {
+                type: Array,
+                observer: '_dataChanged'
+              },
+
+              /**
+                 * Data URL for globe. Must be String
+                 * takes precedence over `data`
+                 *
+                 * @attribute data-url
+                 * @type String
+                 */
+              dataUrl: String
+            },
+
+            behaviors: [
+              Polymer.IronResizableBehavior
+            ],
+            listeners: {
+              'iron-resize': '_resizeGlobe'
+            },
+
+            DEFAULT_SIZE: 500,
+
+            _readDataFromUrl: function(url) {
+              if (this.globe) {
+                var xhr = new XMLHttpRequest();
+                xhr.open( 'GET', url, true );
+
+                xhr.onreadystatechange = function() {
+                    if ( xhr.readyState === 4 && xhr.status === 200 ) {
+                      var data = JSON.parse( xhr.responseText );
+
+                      this.globe.addData( data, {format: 'magnitude'} );
+
+                      this.globe.createPoints();
+                    }
+                }.bind(this);
+
+                xhr.send( null );
+              }
+            },
+
+            _dataChanged: function(newData) {
+              if (!newData) { return; }
+              
+              if (this.dataUrl) { return; } // if dataUrl is provided, we ignore this data change
+
+              if (this.globe) {
+                var data = [];
+                for ( var i = 0; i < newData.length; i ++ ) {
+                  data = data.concat(newData[i]);
+                }
+
+                if (this.globe.points) {
+                    this.globe.scene.remove(this.globe.points);
+                }
+
+                this.globe.addData(data, {format: 'magnitude'});
+
+                this.globe.createPoints();
+              }
+            },
+
+            _resizeGlobe: function() {
+              if(this.globe) {
+                var newSize = this.$.container.offsetWidth || this.DEFAULT_SIZE;
+                this._setContainerHeight(newSize);
+
+                this.globe.onWindowResize();
+              }
+            },
+
+            _getDimension: function() {
+              return this.$.container.offsetWidth || this.DEFAULT_SIZE;
+            },
+
+            _setContainerHeight: function(height) {
+              this.$.container.style.height = height + "px";
+            },
+
+            ready: function() {
+              this.async(function(){
+                var display = window.getComputedStyle(this).display;
+                if (display === 'none' || document.readyState !== 'complete') {
+                  this.async(this.ready, 200);
+                } else {
+                  var container = this.$.container;
+
+                  this._setContainerHeight(this._getDimension());
+
+                  // Make the globe
+                  this.globe = new DAT.Globe( container, {imgDir: this.resolveUrl('globe/')} );
+
+                  if (this.dataUrl) {
+                    this._readDataFromUrl(this.dataUrl);
+                  } else if (this.data) {
+                    this._dataChanged(this.data);
+                  }
+
+                  this.globe.animate();
+                }
+              });
+            }
+        });
+    })();
+</script>

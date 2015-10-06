@@ -154,8 +154,6 @@ DAT.Globe = function(container, opts) {
 
     document.addEventListener('keydown', onDocumentKeyDown, false);
 
-    window.addEventListener('resize', onWindowResize, false);
-
     container.addEventListener('mouseover', function() {
       overRenderer = true;
     }, false);
@@ -402,7 +400,8 @@ DAT.Globe = function(container, opts) {
   this.createPoints = createPoints;
   this.renderer = renderer;
   this.scene = scene;
-
+  this.onWindowResize = onWindowResize;
+  
   return this;
 
 };

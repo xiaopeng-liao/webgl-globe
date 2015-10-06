@@ -1,0 +1,22 @@
+{
+  "name": "webgl-globe",
+  "version": "0.0.1",
+  "description": "A polymer element that displays webGL globe.",
+  "main": "webgl-globe.html",
+  "keywords": [
+    "webgl globe",
+    "web-components"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0",
+    "threejs": "*"
+  },
+  "private": true
+}
