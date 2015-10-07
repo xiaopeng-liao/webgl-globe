@@ -139,8 +139,21 @@ and `data` is ignored.
 
                   this._setContainerHeight(this._getDimension());
 
+                  // define color function for data
+                  var colorFunction = function(x) {
+                    var c = new THREE.Color();
+                    c.setHSL( ( 0.6 - ( x * 0.5 ) ), 1.0, 0.25 );
+                    return c;
+                  };
+
                   // Make the globe
-                  this.globe = new DAT.Globe( container, {imgDir: this.resolveUrl('globe/')} );
+                  this.globe = new DAT.Globe( container, {
+                    imgDir: this.resolveUrl('globe/'),
+                    colorFn: colorFunction
+                  });
+
+                  // change canvas color to white
+                  this.globe.renderer.setClearColor(0xffffff);
 
                   if (this.dataUrl) {
                     this._readDataFromUrl(this.dataUrl);
