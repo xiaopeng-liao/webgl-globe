@@ -15,7 +15,7 @@ var DAT = DAT || {};
 
 DAT.Globe = function(container, opts) {
   opts = opts || {};
-  
+
   var colorFn = opts.colorFn || function(x) {
     var c = new THREE.Color();
     c.setHSL( ( 0.6 - ( x * 0.5 ) ), 1.0, 0.5 );
@@ -136,7 +136,7 @@ DAT.Globe = function(container, opts) {
     mesh.scale.set( 1.1, 1.1, 1.1 );
     scene.add(mesh);
 
-    geometry = new THREE.BoxGeometry(0.75, 0.75, 1);
+    geometry = new THREE.BoxGeometry(2, 2, 1);
     geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-0.5));
 
     point = new THREE.Mesh(geometry);
@@ -204,7 +204,7 @@ DAT.Globe = function(container, opts) {
       lng = data[i + 1];
       color = colorFnWrapper(data,i);
       size = data[i + 2];
-      size = size*200;
+      size = size*100;
       addPoint(lat, lng, size, color, subgeo);
     }
     if (opts.animated) {
@@ -401,8 +401,7 @@ DAT.Globe = function(container, opts) {
   this.renderer = renderer;
   this.scene = scene;
   this.onWindowResize = onWindowResize;
-  
+
   return this;
 
 };
-
