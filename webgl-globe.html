@@ -60,7 +60,15 @@ and `data` is ignored.
                  * @attribute data-url
                  * @type String
                  */
-              dataUrl: String
+              dataUrl: String,
+
+              /**
+                 * Texture image URL for globe. Must be String
+                 *
+                 * @attribute texture-url
+                 * @type String
+                 */
+              textureUrl: String
             },
 
             behaviors: [
@@ -148,7 +156,7 @@ and `data` is ignored.
 
                   // Make the globe
                   this.globe = new DAT.Globe( container, {
-                    imgDir: this.resolveUrl('globe/'),
+                    imgUrl: this.textureUrl || this.resolveUrl('globe/world.jpg'),
                     colorFn: colorFunction
                   });
 
