@@ -110,7 +110,8 @@ DAT.Globe = function(container, opts) {
 
           uniforms: uniforms,
           vertexShader: shader.vertexShader,
-          fragmentShader: shader.fragmentShader
+          fragmentShader: shader.fragmentShader,
+          transparent: true
 
         });
 
