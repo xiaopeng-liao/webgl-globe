@@ -41,7 +41,7 @@ and `data` is ignored.
             properties: {
               /**
                  * Data for globe. Must be an Array of Arrays
-                 * example: [[lat, long, magnitude, lat, long, magnitude, ...] ] where magnitude is a number between 0 and 1
+                 * example: [[lat, long, magnitude, lat, long, magnitude, ...] ] where json is a number between 0 and 1
                  *
                  * Will be ignored if `dataUrl` is defined
                  *
@@ -89,7 +89,7 @@ and `data` is ignored.
                     if ( xhr.readyState === 4 && xhr.status === 200 ) {
                       var data = JSON.parse( xhr.responseText );
 
-                      this.globe.addData( data, {format: 'magnitude'} );
+                      this.globe.addData( data, {format: 'json'} );
 
                       this.globe.createPoints();
                     }
@@ -114,9 +114,9 @@ and `data` is ignored.
                     this.globe.scene.remove(this.globe.points);
                 }
 
-                this.globe.addData(data, {format: 'magnitude'});
+                this.globe.addData(data, {format: 'json'});
 
-                this.globe.createPoints();
+                //this.globe.createPoints();
               }
             },
 

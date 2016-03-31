@@ -76,6 +76,13 @@ DAT.Globe = function(container, opts) {
   var curZoomSpeed = 0;
   var zoomSpeed = 50;
 
+    var currentData=[];
+  var newData = [];//for compare difference between new and old.
+  var displayData = [];
+    var currentOpts={};
+    var currentScale = 1.0;
+    var targetScale = 1.3;
+
   var mouse = { x: 0, y: 0 }, mouseOnDown = { x: 0, y: 0 };
   var rotation = { x: 0, y: 0 },
       target = { x: Math.PI*3/2, y: Math.PI / 6.0 },
@@ -137,12 +144,14 @@ DAT.Globe = function(container, opts) {
     mesh.scale.set( 1.1, 1.1, 1.1 );
     scene.add(mesh);
 
-    geometry = new THREE.BoxGeometry(2, 2, 1);
-    geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-0.5));
+    geometry = new THREE.CylinderGeometry(2,2,1,10);
+
+    geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0,-1));
+    geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(Math.PI/180));
 
     point = new THREE.Mesh(geometry);
-
-    renderer = new THREE.WebGLRenderer({antialias: true});
+    //adding alpha to make sure IE doesn't get flashing background
+    renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
     renderer.setSize(w, h);
 
     renderer.domElement.style.position = 'absolute';
@@ -164,18 +173,35 @@ DAT.Globe = function(container, opts) {
     }, false);
   }
 
-  function addData(data, opts) {
-    var lat, lng, size, color, i, step, colorFnWrapper;
+  function addData(data, opts){
+    try{
+      newData = data;
+      currentOpts = opts;
+      //addDataInternal(data,opts,1.0);
+    }catch(err){
+      console.log("Invalid data encountered!");
+    }
+  }
 
+  function addDataInternal(data, opts, scale) {
+      var lat, lng, size, color, i, step, colorFnWrapper;
+
+    if (this.points) {
+        scene.remove(this.points);
+    }
     opts.animated = opts.animated || false;
     this.is_animated = opts.animated;
-    opts.format = opts.format || 'magnitude'; // other option is 'legend'
+    opts.format = opts.format || 'json'; // other option is 'legend'
     if (opts.format === 'magnitude') {
       step = 3;
       colorFnWrapper = function(data, i) { return colorFn(data[i+2]); }
     } else if (opts.format === 'legend') {
       step = 4;
       colorFnWrapper = function(data, i) { return colorFn(data[i+3]); }
+    } else if (opts.format === 'json'){
+      step = 1;
+      colorFnWrapper = function(data, i) { return colorFn(data[i]["value"]); }
+
     } else {
       throw('error: format not supported: '+opts.format);
     }
@@ -183,11 +209,11 @@ DAT.Globe = function(container, opts) {
     if (opts.animated) {
       if (this._baseGeometry === undefined) {
         this._baseGeometry = new THREE.Geometry();
-        for (i = 0; i < data.length; i += step) {
-          lat = data[i];
-          lng = data[i + 1];
-//        size = data[i + 2];
-          color = colorFnWrapper(data,i);
+        var theData = data[0]
+        for (var key in theData) {
+          lat = theData[key]["latitude"];
+          lng = theData[key]["longitude"];
+          color = colorFnWrapper(theData,key);
           size = 0;
           addPoint(lat, lng, size, color, this._baseGeometry);
         }
@@ -200,12 +226,14 @@ DAT.Globe = function(container, opts) {
       opts.name = opts.name || 'morphTarget'+this._morphTargetId;
     }
     var subgeo = new THREE.Geometry();
-    for (i = 0; i < data.length; i += step) {
-      lat = data[i];
-      lng = data[i + 1];
-      color = colorFnWrapper(data,i);
-      size = data[i + 2];
-      size = size*100;
+    var theData = data[0]
+    for (var key in theData) {
+      lat = theData[key]["latitude"];
+      lng = theData[key]["longitude"];
+      color = colorFnWrapper(theData,key);
+      size = theData[key]["value"];
+      size = size*1000 * scale;
+      if(size > 200) size = 200;
       addPoint(lat, lng, size, color, subgeo);
     }
     if (opts.animated) {
@@ -213,6 +241,8 @@ DAT.Globe = function(container, opts) {
     } else {
       this._baseGeometry = subgeo;
     }
+
+    createPoints();
 
   };
 
@@ -222,7 +252,8 @@ DAT.Globe = function(container, opts) {
         this.points = new THREE.Mesh(this._baseGeometry, new THREE.MeshBasicMaterial({
               color: 0xffffff,
               vertexColors: THREE.FaceColors,
-              morphTargets: false
+              morphTargets: true,
+              transparent: true,
             }));
       } else {
         if (this._baseGeometry.morphTargets.length < 8) {
@@ -237,12 +268,17 @@ DAT.Globe = function(container, opts) {
         this.points = new THREE.Mesh(this._baseGeometry, new THREE.MeshBasicMaterial({
               color: 0xffffff,
               vertexColors: THREE.FaceColors,
-              morphTargets: true
+              morphTargets: true,
+              transparent: true,
+              opacity:0.5
             }));
       }
       scene.add(this.points);
+
     }
   }
+
+
 
   function addPoint(lat, lng, size, color, subgeo) {
 
@@ -254,9 +290,14 @@ DAT.Globe = function(container, opts) {
     point.position.z = 200 * Math.sin(phi) * Math.sin(theta);
 
     point.lookAt(mesh.position);
+    point.rotateX(Math.PI/2);
 
-    point.scale.z = Math.max( size, 0.1 ); // avoid non-invertible matrix
+    point.scale.x = Math.max( size/150, 0.5 ); // avoid non-invertible matrix
+    point.scale.z = Math.max( size/150, 0.5 ); // avoid non-invertible matrix
+
+
     point.updateMatrix();
+
 
     for (var i = 0; i < point.geometry.faces.length; i++) {
 
@@ -338,6 +379,48 @@ DAT.Globe = function(container, opts) {
     renderer.setSize( container.offsetWidth, container.offsetHeight );
   }
 
+  function runSimulation(){
+
+    var DELTA=0.0001;
+
+    if(newData.length > 0){
+      //if there is no new data
+      displayData = currentData;
+      currentData = newData;
+      newData = []
+    }
+
+    if(displayData.length == 0){
+      displayData = currentData;
+    }
+
+    if(currentData.length > 0 && displayData.length > 0){
+      //target = currentData;
+      //current = displayData[0];
+
+
+      for(var key in currentData[0]){
+        if(displayData[0].hasOwnProperty(key)){
+          var newVal = currentData[0][key]['value']
+          var oldVal = displayData[0][key]['value']
+
+          if (Math.abs(newVal - oldVal) > DELTA){
+
+          }
+
+          oldVal = oldVal + (newVal - oldVal) * 0.05; //try to approach the new value
+          displayData[0][key]['value']  = oldVal; //update old value
+
+        }else {
+          displayData[0][key] = currentData[0][key]; //just add key if not exist.
+        }
+
+      }
+
+      addDataInternal(displayData,currentOpts,1.0);
+    }
+  }
+
   function zoom(delta) {
     distanceTarget -= delta;
     distanceTarget = distanceTarget > 1000 ? 1000 : distanceTarget;
@@ -351,6 +434,7 @@ DAT.Globe = function(container, opts) {
 
   function render() {
     zoom(curZoomSpeed);
+    runSimulation();
 
     rotation.x += (target.x - rotation.x) * 0.1;
     rotation.y += (target.y - rotation.y) * 0.1;
@@ -361,6 +445,10 @@ DAT.Globe = function(container, opts) {
     camera.position.z = distance * Math.cos(rotation.x) * Math.cos(rotation.y);
 
     camera.lookAt(mesh.position);
+
+
+
+
 
     renderer.render(scene, camera);
   }
